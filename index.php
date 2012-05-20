@@ -2,8 +2,9 @@
 <html>
 	<head>
 		<title>Roblox Asset Downloader</title>
-		<link href='http://fonts.googleapis.com/css?family=Muli:400,400italic' rel='stylesheet' type='text/css'>
-		<style type="text/css">
+		<link href="http://fonts.googleapis.com/css?family=Muli:400,400italic" rel="stylesheet" type="text/css" />
+		<link rel="shortcut icon" type="image/png" href="http://eric-wieser.tk/images/favicon.png" />
+		<style>
 			body {
 				line-height: 20px;
 				background: #F0F0F0;
@@ -40,15 +41,14 @@
 			header {
 				background: #606060 url(http://eric-wieser.tk/images/logo.png) no-repeat 5px 50%;
 				color: white;
-				padding: 5px;
 				overflow: hidden;
+				padding: 5px;
 				padding-left: 50px;
 			}
 			
 			header h1 {
 				font-size: 40px;
 				line-height: 40px;
-				padding: 0;
 				margin: 0;
 				float: left;
 			}
@@ -57,6 +57,7 @@
 				font-style: italic;
 				line-height: 40px;
 				float: right;
+				padding: 0;
 			}
 			
 			.content {
@@ -84,7 +85,7 @@
 		<section class="content centered">
 			<div class="center">
 				<p>Drag this to your bookmarks or favourites bar:</p>
-				<a draggable="true" class="button" href="javascript:(function(){location.href='http://roblox-asset.comoj.com/'+location.href.match(/-item\?id=(\d+)/i)[1]})()">Download Roblox Asset</a>
+				<a draggable="true" class="button" href="javascript:(function(){location.href='http://roblox-asset.comoj.com/'+location.href.match(/-item\?id=(\d+)/i)[1]})()" onclick="return false">Download Roblox Asset</a>
 				<p>Then click it when viewing an asset detail page</p>
 			</div>
 		</section>
