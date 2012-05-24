@@ -4,6 +4,7 @@
 		<title>Roblox Asset Downloader</title>
 		<link href="http://fonts.googleapis.com/css?family=Muli:400,400italic" rel="stylesheet" type="text/css" />
 		<link rel="shortcut icon" type="image/png" href="http://eric-wieser.tk/images/favicon.png" />
+		<!--[if IE]><script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
 		<style>
 			body {
 				line-height: 20px;
@@ -36,6 +37,7 @@
 				bottom: 0;
 				left: 0;
 				right: 0;
+				display: block;
 			}
 			
 			header {
@@ -44,12 +46,14 @@
 				overflow: hidden;
 				padding: 5px;
 				padding-left: 50px;
+				display: block;
 			}
 			
 			header h1 {
 				font-size: 40px;
 				line-height: 40px;
 				margin: 0;
+				padding: 0;
 				float: left;
 			}
 			header p {
@@ -62,6 +66,7 @@
 			
 			.content {
 				padding: 5px;
+				display: block;
 			}
 			
 			.centered {
@@ -80,11 +85,11 @@
 	<body>
 		<header>
 			<h1>Roblox Asset downloader</h1>
-			<p>Download Roblox models straight from your browser</p>
+			<p>Download Roblox assets straight from your browser</p>
 		</header>
 		<section class="content centered">
 			<div class="center">
-				<p>Drag this to your bookmarks or favourites bar:</p>
+				<p>Drag these to your bookmarks or favourites bar:</p>
 				<a draggable="true" class="button" href="javascript:(function(){location.href='http://roblox-asset.comoj.com/'+location.href.match(/-item\?id=(\d+)/i)[1]})()" onclick="return false">Download Roblox Asset</a>
 				<p>Then click it when viewing an asset detail page</p>
 			</div>

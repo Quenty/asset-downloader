@@ -20,7 +20,10 @@ function presentToUser($data, $asset) {
 	}
 	else {
 		header('Content-Type: text/xml');
-		header('Content-Disposition: attachment; filename="roblox-model-'.$asset.'.rbxm"');
+		//header('Content-Disposition: attachment; filename="roblox-model-'.$asset.'.rbxm"');
+		$data = '<?xml version="1.0" encoding="UTF-8"?>' . "\n" .
+		        '<?xml-stylesheet href="tree.xslt" type="text/xsl" ?>' . "\n" .
+		        $data;
 		echo $data;
 	}
 }
@@ -55,7 +58,7 @@ if(isset($_GET['asset'])) {
 		echo file_get_contents($matches[0]);*/
 	}
 	else {
-		echo $result;
+		echo "Got error: \"$result\" when getting $asset" ;
 	}
 }
 ?>
