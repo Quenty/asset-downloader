@@ -40,30 +40,32 @@ if(isset($_GET['asset'])) {
 	$ch = curl_init("http://www.roblox.com/asset/?id=$asset");
 	curl_setopt($ch, CURLOPT_USERAGENT, "Roblox/WinInet");
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+	curl_setopt($ch, CURLOPT_HEADER, true);
+
 	$result = curl_exec($ch);
+	list($header, $result) = explode("\r\n\r\n", $result, 2);
+
+	if(preg_match('#Location: (.*\.roblox\.com/.*)#', $header, $redirect))
+		$redirect = trim($redirect[1]);
+	else
+		unset($redirect);
+
 	curl_close($ch);
 
-	$matches = array();
-	preg_match("@http://.{4}\.roblox\.com/[a-f0-9]{32}@i", $result, $matches);
-	
-	
-	if(count($matches) > 0) {
-		if(isset($_GET['showurl'])) {
-			echo $matches[0];
-		}
-		else {
-			$ch = curl_init($matches[0]);
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-			$data = curl_exec($ch);
-			curl_close($ch);
-			
-			presentToUser($data, $asset);
-		}
-		/*
-		echo file_get_contents($matches[0]);*/
+	if($redirect) {
+		$ch = curl_init($redirect);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($ch, CURLOPT_HEADER, true);
+		$result = curl_exec($ch);
+		list($header, $result) = explode("\r\n\r\n", $result, 2);
+		curl_close($ch);
 	}
-	else {
-		echo "Got error: \"$result\" when getting $asset" ;
-	}
+
+	if(preg_match('#Content-Type: (.*)#', $header, $type))
+		$type = trim($type[1]);
+	else
+		$type = false;
+
+	presentToUser($result, $asset, $type);
 }
 ?>
