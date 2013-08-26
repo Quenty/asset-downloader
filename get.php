@@ -10,16 +10,16 @@ function presentToUser($data, $asset, $type) {
 		header('Content-Disposition: attachment; filename="roblox-script-'.$asset.'.lua"');
 		echo $data;
 	}
-	elseif(preg_match("/^\x89\x50\x4E\x47\x0D\x0A\x1A\x0A/", $data)) {
+	elseif(preg_match("#^\x89\x50\x4E\x47\x0D\x0A\x1A\x0A#", $data)) {
 		header('Content-Type: image/png');
 		echo $data;
 	}
-	elseif(preg_match("/^version 1.00/", $data)) {
+	elseif(preg_match("#^version 1.00#", $data)) {
 		header('Content-Type: model/x-roblox-mesh');
 		header('Content-Disposition: attachment; filename="roblox-mesh-'.$asset.'.mesh"');
 		echo $data;
 	}
-	elseif(preg_match("/^ID3/", $data)) {
+	elseif(preg_match("#^ID3#", $data)) {
 		header('Content-Type: audio/mp3');
 		echo $data;
 	}
