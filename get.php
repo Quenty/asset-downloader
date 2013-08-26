@@ -1,71 +1,116 @@
 <?php
-//
-// The PHP curl module supports the received page to be returned in a variable
-// if told.
-//
 
-function presentToUser($data, $asset, $type) {
+
+function presentToUser($handle, $asset, $type) {
+
 	if(preg_match("#text/plain#", $type)) {
 		header('Content-Type: text/lua');
 		header('Content-Disposition: attachment; filename="roblox-script-'.$asset.'.lua"');
-		echo $data;
+		fpassthru($handle);
+		return;
 	}
-	elseif(preg_match("#^\x89\x50\x4E\x47\x0D\x0A\x1A\x0A#", $data)) {
+	$header = fread($handle, strlen($pngHeader));
+	if($header == $pngHeader) {
 		header('Content-Type: image/png');
-		echo $data;
+		rewind($handle);
+		fpassthru($handle);
+		return;
 	}
-	elseif(preg_match("#^version 1.00#", $data)) {
-		header('Content-Type: model/x-roblox-mesh');
-		header('Content-Disposition: attachment; filename="roblox-mesh-'.$asset.'.mesh"');
-		echo $data;
+	rewind($handle);
+	if(fread($handle, strlen($meshHeader)) == $meshHeader) {
+		rewind($handle);
+		fpassthru($handle);
+		return;
 	}
-	elseif(preg_match("#^ID3#", $data)) {
+
+	rewind($handle);
+	if(fread($handle, strlen($mp3Header)) == $mp3Header) {
 		header('Content-Type: audio/mp3');
-		echo $data;
+		rewind($handle);
+		fpassthru($handle);
+		return;
 	}
-	else {
-		header('Content-Type: text/xml');
-		//header('Content-Disposition: attachment; filename="roblox-model-'.$asset.'.rbxm"');
-		$data = '<?xml version="1.0" encoding="UTF-8"?>' . "\n" .
-		        '<?xml-stylesheet href="tree.xslt" type="text/xsl" ?>' . "\n" .
-		        $data;
-		echo $data;
-	}
+	rewind($handle);
+
+	header('Content-Type: text/xml');
+	//header('Content-Disposition: attachment; filename="roblox-model-'.$asset.'.rbxm"');
+	echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n" .
+			'<?xml-stylesheet href="tree.xslt" type="text/xsl" ?>' . "\n";
+	fpassthru($handle);
 }
 
-if(isset($_GET['asset'])) {
+$firstData = true;
+$download = @$_GET['download'] == "true";
+function dataRecieved($ch, $str) {
+	global $type, $firstData, $download, $asset, $size;
+	$pngHeader  = "\x89\x50\x4E\x47\x0D\x0A\x1A\x0A";
+	$meshHeader = "version 1.00";
+	$mp3Header  = "ID3";
 
-	$asset = @$_GET['asset'];
 
-	$ch = curl_init("http://www.roblox.com/asset/?id=$asset");
-	curl_setopt($ch, CURLOPT_USERAGENT, "Roblox/WinInet");
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-	curl_setopt($ch, CURLOPT_HEADER, true);
-
-	$result = curl_exec($ch);
-	list($header, $result) = explode("\r\n\r\n", $result, 2);
-
-	if(preg_match('#Location: (.*\.com/.*)#', $header, $redirect))
-		$redirect = trim($redirect[1]);
-	else
-		unset($redirect);
-
-	curl_close($ch);
-
-	if($redirect) {
-		$ch = curl_init($redirect);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($ch, CURLOPT_HEADER, true);
-		$result = curl_exec($ch);
-		list($header, $result) = explode("\r\n\r\n", $result, 2);
-		curl_close($ch);
+	if($firstData) {
+	$size = curl_getinfo($ch, CURLINFO_CONTENT_LENGTH_DOWNLOAD);
+		if(preg_match("#text/plain#", $type)) {
+			header('Content-Type: text/lua');
+			header('Content-Disposition: attachment; filename="roblox-script-'.$asset.'.lua"');
+			#header('Content-Length: '.$size);
+		} elseif(strpos($str, $pngHeader, 0) === 0) {
+			header('Content-Type: image/png');
+			if($download) header('Content-Disposition: attachment; filename="roblox-decal-'.$asset.'.png"');
+			#header('Content-Length: '.$size);
+		} elseif(strpos($str, $meshHeader, 0) === 0) {
+			header('Content-Type: model/x-roblox-mesh');
+			header('Content-Disposition: attachment; filename="roblox-mesh-'.$asset.'.mesh"');
+			#header('Content-Length: '.$size);
+		} elseif(strpos($str, $mp3Header, 0) === 0) {
+			header('Content-Type: audio/mp3');
+			if($download) header('Content-Disposition: attachment; filename="roblox-audio-'.$asset.'.mp3"');
+			#header('Content-Length: '.$size);
+		} else {
+			header('Content-Type: text/xml');
+			if($download) header('Content-Disposition: attachment; filename="roblox-model-'.$asset.'.rbxm"');
+			$xsltHeader = '<?xml version="1.0" encoding="UTF-8"?>' . "\n"
+			            .  '<?xml-stylesheet href="tree.xslt" type="text/xsl" ?>' . "\n";
+			#header('Content-Length: '.(strlen($xsltHeader) + $size + 2000));
+			echo $xsltHeader;
+		}
 	}
 
+	echo $str;
+	$firstData = false;
+	return strlen($str);
+}
+
+
+if(isset($_GET['asset'])) {
+	$asset = @$_GET['asset'];
+
+	$url = "http://www.roblox.com/asset/?id=$asset";
+	$ch = curl_init($url);
+	curl_setopt($ch, CURLOPT_USERAGENT, "Roblox/WinInet");
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($ch, CURLOPT_NOBODY, true);
+	curl_setopt($ch, CURLOPT_HEADER, true);
+	$header = curl_exec($ch);
+
+	# handle redirects
+	if(preg_match('#Location: (.*\..com/.*)#', $header, $redirect)) {
+		curl_setopt($ch, CURLOPT_URL, $redirect[1]);
+		$header = curl_exec($ch);
+	}
+	# parse out content-type
 	if(preg_match('#Content-Type: (.*)#', $header, $type))
 		$type = trim($type[1]);
 	else
 		$type = false;
 
-	presentToUser($result, $asset, $type);
+	# get main contents
+	curl_setopt($ch, CURLOPT_NOBODY, false);
+	curl_setopt($ch, CURLOPT_HEADER, false);
+	curl_setopt($ch, CURLOPT_HTTPGET, true);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
+	curl_setopt($ch, CURLOPT_WRITEFUNCTION, 'dataRecieved');
+	curl_exec($ch);
+	curl_close($ch);
 }
 ?>
