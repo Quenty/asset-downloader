@@ -45,7 +45,7 @@ if(isset($_GET['asset'])) {
 	$result = curl_exec($ch);
 	list($header, $result) = explode("\r\n\r\n", $result, 2);
 
-	if(preg_match('#Location: (.*\.roblox\.com/.*)#', $header, $redirect))
+	if(preg_match('#Location: (.*\.com/.*)#', $header, $redirect))
 		$redirect = trim($redirect[1]);
 	else
 		unset($redirect);
