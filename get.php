@@ -4,8 +4,13 @@
 // if told.
 //
 
-function presentToUser($data, $asset) {
-	if(preg_match("/^\x89\x50\x4E\x47\x0D\x0A\x1A\x0A/", $data)) {
+function presentToUser($data, $asset, $type) {
+	if(preg_match("#text/plain#", $type)) {
+		header('Content-Type: text/lua');
+		header('Content-Disposition: attachment; filename="roblox-script-'.$asset.'.lua"');
+		echo $data;
+	}
+	elseif(preg_match("/^\x89\x50\x4E\x47\x0D\x0A\x1A\x0A/", $data)) {
 		header('Content-Type: image/png');
 		echo $data;
 	}
