@@ -90,7 +90,7 @@
 		<section class="content centered">
 			<div class="center">
 				<p>Drag these to your bookmarks or favourites bar:</p>
-				<a draggable="true" class="button" href="javascript:(function(){location.href='http://roblox-asset.comoj.com/'+location.href.match(/-item|-place\?id=(\d+)/i)[1]})()" onclick="return false">Download Roblox Asset</a>
+				<a draggable="true" class="button" href="javascript:(function(){location.href='http://roblox-asset.comoj.com/'+location.href.match(/-(?:item|place)\?id=(\d+)/i)[1]})()" onclick="return false">Download Roblox Asset</a>
 				<p>Then click it when viewing an asset detail page</p>
 			</div>
 		</section>
